@@ -1,10 +1,14 @@
-const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 //  ! MONGOOSE SCHEMA
 const userSchema = new mongoose.Schema({
-  name: {
+  F_name: {
+    type: String,
+    required: true,
+  },
+  L_name: {
     type: String,
     required: true,
   },
@@ -12,19 +16,21 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phone: {
+  P_pic: {
     type: String,
-  },
-  work: {
-    type: String,
+    required: true,
   },
   password: {
     type: String,
     required: true,
   },
-  cPassword: {
+  role: {
     type: String,
-    required: true,
+    default: "",
+  },
+  createdAt: {
+    type: Date,
+    default: new Date(),
   },
   tokens: [
     {
@@ -36,16 +42,15 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-// we are hashing the password
+// TODO : hashing user password for more security
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 12);
-    this.cPassword = await bcrypt.hash(this.cPassword, 12);
+  if (this.isDirectModified("password")) {
+    this.password = await bcrypt.hash(this.password, 16);
   }
-
   next();
 });
-// we are generating the token
+
+// todo : generate cookie token
 userSchema.methods.generateAuthToken = async function () {
   try {
     let generatedToken = jwt.sign(
@@ -53,6 +58,7 @@ userSchema.methods.generateAuthToken = async function () {
       process.env.SECRET_KEY_JWT
     );
     this.tokens = this.tokens.concat({ token: generatedToken });
+
     await this.save();
     return generatedToken;
   } catch (error) {
@@ -62,5 +68,4 @@ userSchema.methods.generateAuthToken = async function () {
 
 //! MODEL DEFINE
 const User = mongoose.model("USERS", userSchema);
-
 module.exports = User;

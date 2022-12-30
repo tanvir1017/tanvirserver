@@ -1,8 +1,7 @@
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-require("../db/conn");
+require("../db/connectionDB");
 const User = require("../model/userSchema");
 
 router.get("/", (req, res) => {
@@ -18,145 +17,130 @@ router.get("/", (req, res) => {
   }
 });
 
-// GET
+// TODO : find all of the users exist in db collection
 router.get("/users", async (req, res) => {
-  const dataCount = await User.find().countDocuments();
-  User.find()
-    .then((data) => {
-      res.status(200).send({
-        message: "Data found successfully",
-        data,
-        totalCount: dataCount,
+  try {
+    const totalCountedData = await User.find().countDocuments();
+    User.find()
+      .then((data) => {
+        res.status(200).send({
+          success: true,
+          message: `Total data founded ${totalCountedData}`,
+          data: data,
+        });
+      })
+      .catch((err) => {
+        res.status(500).send({
+          success: false,
+          message: "Something wrong with internal server",
+          error: `Failed to find user ${err}`,
+        });
       });
-    })
-    .catch((err) =>
-      res.status(500).send({ err: `Failed to find user ${err}` })
-    );
+  } catch (err) {
+    res.status(500).send({ err: `Failed to find user ${err}` });
+  }
 });
 
-// usingPromises
-// router.post("/register", (req, res) => {
-//   const { name, email, phone, work, password, cPassword } = req.body;
-//   if (!name || !email || !phone || !work || !password || !cPassword) {
-//     return res.status(422).send({
-//       message: "Please filed the field properly",
-//     });
-//   }
-
-//   User.findOne({ email: email })
-//     .then((userExist) => {
-//       if (userExist) {
-//         return res.status(422).send({
-//           message: "Email already exist",
-//         });
-//       }
-
-//       const user = new User({
-//         name,
-//         email,
-//         phone,
-//         work,
-//         password,
-//         cPassword,
-//       });
-//       user
-//         .save()
-//         .then(() => {
-//           res
-//             .status(201)
-//             .send({ message: "user register successfully", data: user });
-//         })
-//         .catch((err) =>
-//           res.status(500).send({ err: `Failed to register and ${err}` })
-//         );
-//     })
-//     .catch((err) => console.log(err));
-// });
-
-// with the help of async await
-
+// Todo : Register a new user. If User email exist on the data base then it won't register any user.
 router.post("/register", async (req, res) => {
-  const { name, email, phone, work, password, cPassword } = req.body;
-  if (!name || !email || !phone || !work || !password || !cPassword) {
-    return res.status(422).send({
-      message: "Please filed the field properly",
-    });
-  }
   try {
-    const existUser = await User.findOne({ email: email });
-    const user = new User({
-      name,
+    const {
+      F_name,
+      L_name,
       email,
-      phone,
-      work,
+      P_pic,
       password,
-      cPassword,
-    });
-    if (existUser) {
+      C_password,
+      role,
+      createAt,
+    } = req.body;
+    if (!F_name || !L_name || !email || !P_pic || !password || !C_password) {
       return res.status(422).send({
-        message: "Email already exist",
-      });
-    } else if (password !== cPassword) {
-      res.status(401).send({
-        message: "Password didn't matched with confirm password",
+        message:
+          "Please full-fill all the of the requirement that asked to you for register new account",
       });
     } else {
-      // before save register info password will help to hash
-      const userRegister = await user.save();
+      const existUser = await User.findOne({ email: email });
+      const user = new User({
+        F_name,
+        L_name,
+        email,
+        P_pic,
+        password,
+        C_password,
+        role,
+        createAt,
+      });
 
-      if (userRegister) {
-        res
-          .status(201)
-          .send({ message: "user register successfully", data: user });
+      if (existUser) {
+        return res.status(422).send({
+          success: false,
+          message: `user already have an account with this email ID: ${email} `,
+        });
+      } else if (password !== C_password) {
+        return res.status(401).send({
+          message: "Password didn't matched, Recheck and try again. Please!",
+        });
       } else {
-        res.status(500).send({ message: "user register failed " });
+        const isRegister = await user.save();
+        if (isRegister) {
+          return res.status(201).send({
+            success: true,
+            message: `account created successful`,
+            data: user,
+          });
+        } else {
+          return res.status(500).send({
+            success: false,
+            message: `user register failed try again a while`,
+          });
+        }
       }
     }
   } catch (error) {
-    res
-      .status(500)
-      .send({ message: "Internal server error while register user" });
+    res.status(500).send({
+      message: `Internal server error with the code 500 and ${error.message}`,
+    });
   }
 });
-
-// Login
+// TODO : Login with your account
 router.get("/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(422)
-        .send({ message: "Please fullfil the required field" });
+      return res.status(422).send({
+        message: "Please full-fill the required field",
+      });
     }
-
     const userInfo = await User.findOne({ email: email });
-
     if (!userInfo) {
-      return res.status(400).send({ message: "wrong credential" });
+      return res.status(400).send({
+        message: `wrong credential`,
+      });
     } else {
+      // todo : password decode by bcryptjs
       const checkPass = await bcrypt.compare(password, userInfo.password);
-
+      // todo : cookie set
       const token = await userInfo.generateAuthToken();
-
-      res.cookie("mern_jwtoken", token, {
-        expires: new Date(Date.now() + 604800),
+      res.cookie("authToken", token, {
+        expires: new Date(Date.now() + 2592000),
         httpOnly: true,
       });
       if (!checkPass) {
         return res.status(400).send({
-          message: "wrong credential",
+          message: `wrong credential`,
         });
       } else {
-        res.status(200).send({
-          message: "user signin successfully",
+        return res.status(200).send({
+          success: true,
+          message: "user sign-in successfully",
           data: userInfo,
         });
       }
     }
   } catch (error) {
     res.status(500).send({
-      message: "Internal server error",
-      error,
+      message: `internal server error with this error:- ${error}`,
     });
   }
 });

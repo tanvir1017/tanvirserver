@@ -1,4 +1,3 @@
-const dotenv = require("dotenv");
 const express = require("express");
 const app = express();
 
@@ -10,16 +9,17 @@ const port = process.env.PORT || 1017;
 require("dotenv").config();
 
 // info CONNECTING WITH CONN
-require("./db/conn");
+require("./db/connectionDB");
 
 // ! FILE WITH EXPRESS.JSON()
 app.use(express.json());
 
 // @ LINKING WITH ROUTER
 app.use(require("./router/auth"));
+app.use(require("./router/blog"));
 
 // comments :- MIDDLEWARE
-app.get("/home", (req, res) => {
+app.get("/", (req, res) => {
   res.send({ message: "hello from home" });
   console.log("hello from home");
 });
@@ -27,5 +27,4 @@ app.get("/home", (req, res) => {
 //comments :-  LISTEN
 app.listen(port, async () => {
   console.log(`app listening of port ${port}`);
-  //   await connectDB();
 });
