@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-
 mongoose.set("strictQuery", false);
 
 // info DOTENV FILE ACCESS
 const DB = process.env.DB;
 const PORT = process.env.PORT;
+console.log(PORT, DB);
 
 // comments :- CONNECTION WITH MONGODB ATLAS
 mongoose

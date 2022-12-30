@@ -19,9 +19,8 @@ app.use(require("./router/auth"));
 app.use(require("./router/blog"));
 
 // comments :- MIDDLEWARE
-app.get("/", (req, res) => {
-  res.send({ message: "hello from home" });
-  console.log("hello from home");
+app.get("/home", (req, res) => {
+  res.send({ message: "Hello Sir! Welcome to the server file" });
 });
 
 //comments :-  LISTEN
