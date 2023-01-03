@@ -4,11 +4,11 @@ const mongoose = require("mongoose");
 
 //  ! MONGOOSE SCHEMA
 const userSchema = new mongoose.Schema({
-  F_name: {
+  firstName: {
     type: String,
     required: true,
   },
-  L_name: {
+  lastName: {
     type: String,
     required: true,
   },
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  P_pic: {
+  pictureURL: {
     type: String,
     required: true,
   },

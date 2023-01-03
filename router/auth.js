@@ -45,16 +45,16 @@ router.get("/users", async (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     const {
-      F_name,
-      L_name,
+      firstName,
+      lastName,
       email,
-      P_pic,
+      pictureURL,
       password,
-      C_password,
       role,
       createAt,
+      rememberMeFor,
     } = req.body;
-    if (!F_name || !L_name || !email || !P_pic || !password || !C_password) {
+    if (!firstName || !lastName || !email || !pictureURL || !password) {
       return res.status(422).send({
         message:
           "Please full-fill all the of the requirement that asked to you for register new account",
@@ -62,12 +62,11 @@ router.post("/register", async (req, res) => {
     } else {
       const existUser = await User.findOne({ email: email });
       const user = new User({
-        F_name,
-        L_name,
+        firstName,
+        lastName,
         email,
-        P_pic,
+        pictureURL,
         password,
-        C_password,
         role,
         createAt,
       });
@@ -77,12 +76,13 @@ router.post("/register", async (req, res) => {
           success: false,
           message: `user already have an account with this email ID: ${email} `,
         });
-      } else if (password !== C_password) {
-        return res.status(401).send({
-          message: "Password didn't matched, Recheck and try again. Please!",
-        });
       } else {
         const isRegister = await user.save();
+        const token = await isRegister.generateAuthToken();
+        res.cookie("authToken", token, {
+          expires: new Date(Date.now() + rememberMeFor || 2592000),
+          httpOnly: true,
+        });
         if (isRegister) {
           return res.status(201).send({
             success: true,

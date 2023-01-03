@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 
 // ! PROT & DB DECLARE
@@ -13,6 +14,7 @@ require("./db/connectionDB");
 
 // ! FILE WITH EXPRESS.JSON()
 app.use(express.json());
+app.use(cors());
 
 // @ LINKING WITH ROUTER
 app.use(require("./router/auth"));
