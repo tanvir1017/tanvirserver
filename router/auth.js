@@ -79,13 +79,13 @@ router.post("/register", async (req, res) => {
       } else {
         const isRegister = await user.save();
         if (isRegister) {
-          const token = await isRegister.generateAuthToken();
-          res.cookie("authToken", token, {
-            expires: new Date(
-              Date.now() + rememberMeFor ? rememberMeFor : 2592000
-            ),
-            httpOnly: true,
-          });
+          // const token = await isRegister.generateAuthToken();
+          // res.cookie("authToken", token, {
+          //   expires: new Date(
+          //     Date.now() + rememberMeFor ? rememberMeFor : 2592000
+          //   ),
+          //   httpOnly: true,
+          // });
           return res.status(201).json({
             success: true,
             message: `account created successful`,
