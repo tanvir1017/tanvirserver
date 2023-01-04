@@ -7,11 +7,11 @@ const User = require("../model/userSchema");
 router.get("/", (req, res) => {
   try {
     console.log("connecting....");
-    res.status(200).send({
+    res.status(200).json({
       message: "From the router home page",
     });
   } catch (error) {
-    res.status(500).send({
+    res.status(500).json({
       message: error.message,
     });
   }
@@ -23,21 +23,21 @@ router.get("/users", async (req, res) => {
     const totalCountedData = await User.find().countDocuments();
     User.find()
       .then((data) => {
-        res.status(200).send({
+        res.status(200).json({
           success: true,
           message: `Total data founded ${totalCountedData}`,
           data: data,
         });
       })
       .catch((err) => {
-        res.status(500).send({
+        res.status(500).json({
           success: false,
           message: "Something wrong with internal server",
           error: `Failed to find user ${err}`,
         });
       });
   } catch (err) {
-    res.status(500).send({ err: `Failed to find user ${err}` });
+    res.status(500).json({ err: `Failed to find user ${err}` });
   }
 });
 
@@ -55,7 +55,7 @@ router.post("/register", async (req, res) => {
       rememberMeFor,
     } = req.body;
     if (!firstName || !lastName || !email || !pictureURL || !password) {
-      return res.status(422).send({
+      return res.status(422).json({
         message:
           "Please full-fill all the of the requirement that asked to you for register new account",
       });
@@ -72,25 +72,27 @@ router.post("/register", async (req, res) => {
       });
 
       if (existUser) {
-        return res.status(422).send({
+        return res.status(422).json({
           success: false,
           message: `user already have an account with this email ID: ${email} `,
         });
       } else {
         const isRegister = await user.save();
-        const token = await isRegister.generateAuthToken();
-        res.cookie("authToken", token, {
-          expires: new Date(Date.now() + rememberMeFor || 2592000),
-          httpOnly: true,
-        });
         if (isRegister) {
-          return res.status(201).send({
+          const token = await isRegister.generateAuthToken();
+          res.cookie("authToken", token, {
+            expires: new Date(
+              Date.now() + rememberMeFor ? rememberMeFor : 2592000
+            ),
+            httpOnly: true,
+          });
+          res.status(201).json({
             success: true,
             message: `account created successful`,
             data: user,
           });
         } else {
-          return res.status(500).send({
+          return res.status(500).json({
             success: false,
             message: `user register failed try again a while`,
           });
@@ -98,7 +100,7 @@ router.post("/register", async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).send({
+    res.status(500).json({
       message: `Internal server error with the code 500 and ${error.message}`,
     });
   }
@@ -108,13 +110,13 @@ router.get("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(422).send({
+      return res.status(422).json({
         message: "Please full-fill the required field",
       });
     }
     const userInfo = await User.findOne({ email: email });
     if (!userInfo) {
-      return res.status(400).send({
+      return res.status(400).json({
         message: `wrong credential`,
       });
     } else {
@@ -127,11 +129,11 @@ router.get("/login", async (req, res) => {
         httpOnly: true,
       });
       if (!checkPass) {
-        return res.status(400).send({
+        return res.status(400).json({
           message: `wrong credential`,
         });
       } else {
-        return res.status(200).send({
+        return res.status(200).json({
           success: true,
           message: "user sign-in successfully",
           data: userInfo,
@@ -139,7 +141,7 @@ router.get("/login", async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).send({
+    res.status(500).json({
       message: `internal server error with this error:- ${error}`,
     });
   }

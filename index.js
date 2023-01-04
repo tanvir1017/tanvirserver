@@ -13,8 +13,8 @@ require("dotenv").config();
 require("./db/connectionDB");
 
 // ! FILE WITH EXPRESS.JSON()
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 // @ LINKING WITH ROUTER
 app.use(require("./router/auth"));
