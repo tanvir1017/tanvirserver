@@ -86,7 +86,7 @@ router.post("/register", async (req, res) => {
             ),
             httpOnly: true,
           });
-          res.status(201).json({
+          return res.status(201).json({
             success: true,
             message: `account created successful`,
             data: user,
