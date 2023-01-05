@@ -79,13 +79,13 @@ router.post("/register", async (req, res) => {
       } else {
         const isRegister = await user.save();
         if (isRegister) {
-          // const token = await isRegister.generateAuthToken();
-          // res.cookie("authToken", token, {
-          //   expires: new Date(
-          //     Date.now() + rememberMeFor ? rememberMeFor : 2592000
-          //   ),
-          //   httpOnly: true,
-          // });
+          const token = await isRegister.generateAuthToken();
+          res.cookie("authToken", token, {
+            expires: new Date(
+              Date.now() + rememberMeFor ? rememberMeFor : 2592000
+            ),
+            httpOnly: true,
+          });
           return res.status(201).json({
             success: true,
             message: `account created successful`,
@@ -105,6 +105,47 @@ router.post("/register", async (req, res) => {
     });
   }
 });
+
+// Todo : Register a new user. If User email exist on the data base then it won't register any user.
+router.post("/sign-up", async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      pictureURL,
+      password,
+      role,
+      createAt,
+      rememberMeFor,
+    } = req.body;
+    const userData = new User({
+      firstName,
+      lastName,
+      email,
+      pictureURL,
+      password,
+      role,
+      createAt,
+      rememberMeFor,
+    });
+    const dataSendToDB = await userData.save();
+    console.log(dataSendToDB);
+    if (dataSendToDB) {
+      res.status(201).send({
+        success: true,
+        message: "account created successfully",
+        data: dataSendToDB,
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
 // TODO : Login with your account
 router.get("/login", async (req, res) => {
   try {
