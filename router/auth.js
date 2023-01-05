@@ -108,40 +108,33 @@ router.post("/register", async (req, res) => {
 
 // Todo : Register a new user. If User email exist on the data base then it won't register any user.
 router.post("/sign-up", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      pictureURL,
-      password,
-      role,
-      createAt,
-      rememberMeFor,
-    } = req.body;
-    const userData = new User({
-      firstName,
-      lastName,
-      email,
-      pictureURL,
-      password,
-      role,
-      createAt,
-      rememberMeFor,
-    });
-    const dataSendToDB = await userData.save();
-    console.log(dataSendToDB);
-    if (dataSendToDB) {
-      res.status(201).send({
-        success: true,
-        message: "account created successfully",
-        data: dataSendToDB,
-      });
-    }
-  } catch (err) {
-    return res.status(500).send({
-      success: false,
-      message: err.message,
+  const {
+    firstName,
+    lastName,
+    email,
+    pictureURL,
+    password,
+    role,
+    createAt,
+    rememberMeFor,
+  } = req.body;
+  const userData = new User({
+    firstName,
+    lastName,
+    email,
+    pictureURL,
+    password,
+    role,
+    createAt,
+    rememberMeFor,
+  });
+  const dataSendToDB = await userData.save();
+  console.log(dataSendToDB);
+  if (dataSendToDB) {
+    res.status(201).send({
+      success: true,
+      message: "account created successfully",
+      data: dataSendToDB,
     });
   }
 });
