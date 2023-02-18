@@ -42,69 +42,69 @@ router.get("/users", async (req, res) => {
 });
 
 // Todo : Register a new user. If User email exist on the data base then it won't register any user.
-router.post("/register", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      pictureURL,
-      password,
-      role,
-      createAt,
-      rememberMeFor,
-    } = req.body;
-    if (!firstName || !lastName || !email || !pictureURL || !password) {
-      return res.status(422).json({
-        message:
-          "Please full-fill all the of the requirement that asked to you for register new account",
-      });
-    } else {
-      const existUser = await User.findOne({ email: email });
-      const user = new User({
-        firstName,
-        lastName,
-        email,
-        pictureURL,
-        password,
-        role,
-        createAt,
-      });
+// router.post("/register", async (req, res) => {
+//   try {
+//     const {
+//       firstName,
+//       lastName,
+//       email,
+//       pictureURL,
+//       password,
+//       role,
+//       createAt,
+//       rememberMeFor,
+//     } = req.body;
+//     if (!firstName || !lastName || !email || !pictureURL || !password) {
+//       return res.status(422).json({
+//         message:
+//           "Please full-fill all the of the requirement that asked to you for register new account",
+//       });
+//     } else {
+//       const existUser = await User.findOne({ email: email });
+//       const user = new User({
+//         firstName,
+//         lastName,
+//         email,
+//         pictureURL,
+//         password,
+//         role,
+//         createAt,
+//       });
 
-      if (existUser) {
-        return res.status(422).json({
-          success: false,
-          message: `user already have an account with this email ID: ${email} `,
-        });
-      } else {
-        const isRegister = await user.save();
-        if (isRegister) {
-          const token = await isRegister.generateAuthToken();
-          res.cookie("authToken", token, {
-            expires: new Date(
-              Date.now() + rememberMeFor ? rememberMeFor : 2592000
-            ),
-            httpOnly: true,
-          });
-          return res.status(201).json({
-            success: true,
-            message: `account created successful`,
-            data: user,
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: `user register failed try again a while`,
-          });
-        }
-      }
-    }
-  } catch (error) {
-    res.status(500).json({
-      message: `Internal server error with the code 500 and ${error.message}`,
-    });
-  }
-});
+//       if (existUser) {
+//         return res.status(422).json({
+//           success: false,
+//           message: `user already have an account with this email ID: ${email} `,
+//         });
+//       } else {
+//         const isRegister = await user.save();
+//         if (isRegister) {
+//           const token = await isRegister.generateAuthToken();
+//           res.cookie("authToken", token, {
+//             expires: new Date(
+//               Date.now() + rememberMeFor ? rememberMeFor : 2592000
+//             ),
+//             httpOnly: true,
+//           });
+//           return res.status(201).json({
+//             success: true,
+//             message: `account created successful`,
+//             data: user,
+//           });
+//         } else {
+//           return res.status(500).json({
+//             success: false,
+//             message: `user register failed try again a while`,
+//           });
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json({
+//       message: `Internal server error with the code 500 and ${error.message}`,
+//     });
+//   }
+// });
 
 // Todo : Register a new user. If User email exist on the data base then it won't register any user.
 router.post("/sign-up", async (req, res) => {
@@ -130,13 +130,11 @@ router.post("/sign-up", async (req, res) => {
   });
   const dataSendToDB = await userData.save();
   console.log(dataSendToDB);
-  if (dataSendToDB) {
-    res.status(201).send({
-      success: true,
-      message: "account created successfully",
-      data: dataSendToDB,
-    });
-  }
+  res.status(201).send({
+    success: true,
+    message: "account created successfully",
+    data: dataSendToDB,
+  });
 });
 
 // TODO : Login with your account
